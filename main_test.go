@@ -12,6 +12,7 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"testing"
+	"time"
 
 	"github.com/m-lab/go/rtx"
 )
@@ -115,8 +116,22 @@ func Test_main(t *testing.T) {
 	defer ts.Close()
 	rawURL = ts.URL
 	go func() {
-		http.Get("http://localhost" + rawAddr)
-		cancelCtx()
+		// Wait briefly to lose the race with main starting the local server.
+		time.Sleep(1 * time.Second)
+		// Defer call to cancelCtx so returning or any error cancels the main context.
+		defer cancelCtx()
+		resp, err := http.Get("http://localhost" + rawAddr)
+		if err != nil {
+			t.Error(err)
+		}
+		if resp.StatusCode != http.StatusOK {
+			t.Errorf("Response ")
+		}
+		b, err := ioutil.ReadAll(resp.Body)
+		rtx.Must(err, "Failed to read response")
+		if string(b) != "ok" {
+			t.Errorf("main() failed to read proxy data; got %s, want \"ok\"", string(b))
+		}
 	}()
 	main()
 }
