@@ -9,3 +9,11 @@ checks, which currently only support HTTP targets.
 
 Default options support use as a proxy for HA Kubernetes master health
 checks.
+
+## Usage
+
+Using the default listen address and local Kubernetes API server:
+```
+  docker run -it -p 8080:8080 measurementlab/gcp-loadbalancer-proxy:v1.0 \
+     -url https://localhost:6443
+```
